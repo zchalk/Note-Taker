@@ -23,6 +23,7 @@ app.get('/api/notes', async (req, res) => {
     res.json(noteArr);
 });
 
+
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'))});
 
