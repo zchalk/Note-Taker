@@ -2,9 +2,12 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const util = require('util');
+const {uid} = require('uid');
+
 
 const app = express();
 const PORT = process.env.PORT || 8000;
+
 
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
@@ -23,6 +26,14 @@ app.get('/api/notes', async (req, res) => {
     res.json(noteArr);
 });
 
+app.post('/api/notes', async (req, res) => {
+    const noteData = await readFile(path.join(__dirname,"/db/db.json"), "utf8");
+    const noteArr = JSON.parse(noteData);
+    req.body.id = uid(32);
+    noteArr.push(req.body);
+    await writeFile(path.join(__dirname,"/db/db.json"),JSON.stringify(noteArr));
+    res.json(noteArr);
+});
 
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '/public/index.html'))});
