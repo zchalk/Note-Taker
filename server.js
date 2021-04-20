@@ -1,69 +1,14 @@
 const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const util = require('util');
-const {uid} = require('uid');
-
 
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-
 app.use(express.urlencoded({extended: true}));
 app.use(express.json());
-app.use(express.static("public"))
-
-//routes 
-const readFile = util.promisify(fs.readFile);
-const writeFile = util.promisify(fs.writeFile);
-
-app.get('/notes', (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/notes.html'))});
- 
-app.get('/api/notes', async (req, res) => {
-    try {
-    const noteData = await readFile(path.join(__dirname,"/db/db.json"), "utf8");
-    const noteArr = JSON.parse(noteData);
-    res.json(noteArr);
-    } catch(err) {
-        console.log(err);
-
-}
-});
-
-app.post('/api/notes', async (req, res) => {
-    try {
-    const noteData = await readFile(path.join(__dirname,"/db/db.json"), "utf8");
-    const noteArr = JSON.parse(noteData);
-    req.body.id = uid(32);
-    noteArr.push(req.body);
-    await writeFile(path.join(__dirname,"/db/db.json"),JSON.stringify(noteArr));
-    res.json(noteArr);
-    } catch(err) {
-        console.log(err);
-    }
-});
- app.delete('/api/notes/:id', async (req, res) => {
-     try {
-     const noteData = await readFile(path.join(__dirname,"/db/db.json"), "utf8");
-     const noteArr = JSON.parse(noteData);
-     const noteID = req.params.id;
-     const newNoteArr = noteArr.filter(note => note.id !== noteID);
-     await writeFile(path.join(__dirname,"/db/db.json"),JSON.stringify(newNoteArr));
-     res.json(newNoteArr);
-     } catch(err) {
-        console.log(err);
-     }
-
- });
+app.use(express.static("public"));
 
 
-app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '/public/index.html'))});
-
-
-
-
+require('./routes/routes.js')(app);
 
 
 app.listen(PORT, () => {
